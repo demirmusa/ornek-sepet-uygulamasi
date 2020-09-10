@@ -10,6 +10,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Sepet.Application;
+using Sepet.InMemory;
+using Sepet.MongoDb;
+using Sepet.Redis;
 
 namespace Sepet.API
 {
@@ -25,6 +29,22 @@ namespace Sepet.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            //test ederken kolaylık olması için bu şekilde eklendi. Appsettingsde StorageType alanını değiştirebilirsiniz.
+            if (SepetInMemoryAktifMi)
+            {
+                services.AddSepetInMemory();
+            }
+            else if (SepetMongoDbAktifMi)
+            {
+                services.AddSepetMongoDb();
+            }
+            else if (SepetRedisAktifMi)
+            {
+                services.AddSepetRedis();
+            }
+            
+            services.AddSepetApplication();
+            
             services.AddControllers();
         }
 
@@ -44,5 +64,9 @@ namespace Sepet.API
 
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
         }
+
+        private bool SepetInMemoryAktifMi => Configuration["StorageType"] == "InMemory";
+        private bool SepetMongoDbAktifMi => Configuration["StorageType"] == "MongoDb";
+        private bool SepetRedisAktifMi => Configuration["StorageType"] == "Redis";
     }
 }
