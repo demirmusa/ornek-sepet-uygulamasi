@@ -1,19 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Sepet.Application;
 using Sepet.InMemory;
 using Sepet.MongoDb;
-using Sepet.Redis;
 
 namespace Sepet.API
 {
@@ -30,17 +22,13 @@ namespace Sepet.API
         public void ConfigureServices(IServiceCollection services)
         {
             //test ederken kolaylık olması için bu şekilde eklendi. Appsettingsde StorageType alanını değiştirebilirsiniz.
-            if (SepetInMemoryAktifMi)
-            {
-                services.AddSepetInMemory();
-            }
-            else if (SepetMongoDbAktifMi)
+            if (SepetMongoDbAktifMi)
             {
                 services.AddSepetMongoDb();
             }
-            else if (SepetRedisAktifMi)
+            else if (SepetInMemoryAktifMi)
             {
-                services.AddSepetRedis();
+                services.AddSepetInMemory();
             }
             
             services.AddSepetApplication();
