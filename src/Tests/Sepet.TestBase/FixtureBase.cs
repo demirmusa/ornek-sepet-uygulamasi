@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System.Diagnostics;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Sepet.TestBase
 {
@@ -8,7 +9,7 @@ namespace Sepet.TestBase
         
         protected abstract void ConfigureServices(IServiceCollection services);
         
-        protected FixtureBase()
+        public void PrepareServices()
         {
             var serviceCollection = new ServiceCollection();
             ConfigureServices(serviceCollection);

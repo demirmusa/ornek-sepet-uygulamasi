@@ -61,7 +61,8 @@ namespace Sepet.TestBase
             sepet.ShouldNotBeNull();
             sepet.MusteriId.ShouldBe(_testMusteriId);
             sepet.Items.ShouldNotBeEmpty();
-
+            sepet.Items.Count.ShouldBe(2);
+            
             SepettekiUrunAdediniKontrolEt(sepet.Items, _testUrun1Id, 3);
             SepettekiUrunAdediniKontrolEt(sepet.Items, _testUrun2Id, 5);
         }

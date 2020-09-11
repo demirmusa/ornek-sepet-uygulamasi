@@ -11,6 +11,7 @@ namespace Sepet.TestBase
         protected TestBaseClass(TFixture fixture)
         {
             Fixture = fixture;
+            fixture.PrepareServices();
         }
     }
 }

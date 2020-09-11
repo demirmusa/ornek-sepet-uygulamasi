@@ -16,7 +16,7 @@ namespace Sepet.Core.Models
             MusteriId = musteriId;
         }
 
-        public void AddItem(int urunId, int adet)
+        public void UrunEkle(int urunId, int adet)
         {
             if (Items.Any(x => x.UrunId == urunId))
             {
