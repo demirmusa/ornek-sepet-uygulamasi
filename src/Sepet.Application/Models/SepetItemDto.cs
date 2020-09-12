@@ -2,8 +2,7 @@
 {
     public class SepetItemDto
     {
-        public int UrunId { get; set; }
-        
+        public UrunBilgileriDto UrunBilgileri { get; set; } = new UrunBilgileriDto();
         public int Adet { get; set; }
     }
 }

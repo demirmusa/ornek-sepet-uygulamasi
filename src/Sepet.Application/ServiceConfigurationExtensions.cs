@@ -6,7 +6,7 @@ namespace Sepet.Application
     {
         public static void AddSepetApplication(this IServiceCollection services)
         {
-            
+            services.AddTransient<IUrunApplicationService, UrunApplicationService>();
         }
     }
 }

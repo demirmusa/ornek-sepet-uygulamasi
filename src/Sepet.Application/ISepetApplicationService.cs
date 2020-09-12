@@ -1,11 +1,12 @@
-﻿using Sepet.Application.Models;
+﻿using System.Threading.Tasks;
+using Sepet.Application.Models;
 
 namespace Sepet.Application
 {
     public interface ISepetApplicationService
     {
-        public MusteriSepetiDto MusteriSepetiGetir(int musteriId);
+        public Task<MusteriSepetiDto> MusteriSepetiGetir(int musteriId);
 
-        public void SepeteUrunEkle(int musteriId, int urunId, int adet);
+        public Task SepeteUrunEkle(int musteriId, int urunId, int adet);
     }
 }

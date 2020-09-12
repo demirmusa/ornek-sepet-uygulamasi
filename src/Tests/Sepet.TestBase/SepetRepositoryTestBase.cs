@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Sepet.Core;
 using Sepet.Core.Models;
 using Shouldly;
@@ -21,55 +22,55 @@ namespace Sepet.TestBase
         }
 
         [Fact]
-        public virtual void Sepete_Yeni_Urun_Ekleme_Kontrolu()
+        public virtual async Task Sepete_Yeni_Urun_Ekleme_Kontrolu()
         {
-            _sepetRepository.SepeteUrunEkle(_testMusteriId, _testUrun1Id, 1);
-            SepettekiUrunAdediniKontrolEt(_testMusteriId, _testUrun1Id, 1);
+            await _sepetRepository.SepeteUrunEkle(_testMusteriId, _testUrun1Id, 1);
+            await SepettekiUrunAdediniKontrolEt(_testMusteriId, _testUrun1Id, 1);
 
-            _sepetRepository.SepeteUrunEkle(_testMusteriId, _testUrun2Id, 4);
-            SepettekiUrunAdediniKontrolEt(_testMusteriId, _testUrun2Id, 4);
+            await _sepetRepository.SepeteUrunEkle(_testMusteriId, _testUrun2Id, 4);
+            await SepettekiUrunAdediniKontrolEt(_testMusteriId, _testUrun2Id, 4);
 
-            SepettekiUrunAdediniKontrolEt(_testMusteriId, _testUrun1Id, 1); //bir ürün eklendiğinde diğer ürünün sayısında değişme olmamalı
+            await SepettekiUrunAdediniKontrolEt(_testMusteriId, _testUrun1Id, 1); //bir ürün eklendiğinde diğer ürünün sayısında değişme olmamalı
         }
 
         [Fact]
-        public virtual void Sepete_Aynı_Urunden_Ekleme_Kontrolu()
+        public virtual async Task Sepete_Aynı_Urunden_Ekleme_Kontrolu()
         {
-            _sepetRepository.SepeteUrunEkle(_testMusteriId, _testUrun1Id, 1);
-            SepettekiUrunAdediniKontrolEt(_testMusteriId, _testUrun1Id, 1);
+            await _sepetRepository.SepeteUrunEkle(_testMusteriId, _testUrun1Id, 1);
+            await SepettekiUrunAdediniKontrolEt(_testMusteriId, _testUrun1Id, 1);
 
-            _sepetRepository.SepeteUrunEkle(_testMusteriId, _testUrun1Id, 2);
-            SepettekiUrunAdediniKontrolEt(_testMusteriId, _testUrun1Id, 3);
+            await _sepetRepository.SepeteUrunEkle(_testMusteriId, _testUrun1Id, 2);
+            await SepettekiUrunAdediniKontrolEt(_testMusteriId, _testUrun1Id, 3);
 
-            _sepetRepository.SepeteUrunEkle(_testMusteriId, _testUrun2Id, 4);
-            SepettekiUrunAdediniKontrolEt(_testMusteriId, _testUrun2Id, 4);
+            await _sepetRepository.SepeteUrunEkle(_testMusteriId, _testUrun2Id, 4);
+            await SepettekiUrunAdediniKontrolEt(_testMusteriId, _testUrun2Id, 4);
 
-            _sepetRepository.SepeteUrunEkle(_testMusteriId, _testUrun2Id, 2);
-            SepettekiUrunAdediniKontrolEt(_testMusteriId, _testUrun2Id, 6);
+            await _sepetRepository.SepeteUrunEkle(_testMusteriId, _testUrun2Id, 2);
+            await SepettekiUrunAdediniKontrolEt(_testMusteriId, _testUrun2Id, 6);
 
-            SepettekiUrunAdediniKontrolEt(_testMusteriId, _testUrun1Id, 3); //bir ürün eklendiğinde diğer ürünün sayısında değişme olmamalı
+            await SepettekiUrunAdediniKontrolEt(_testMusteriId, _testUrun1Id, 3); //bir ürün eklendiğinde diğer ürünün sayısında değişme olmamalı
         }
 
         [Fact]
-        public virtual void Musteri_Sepeti_Getir_Kontrolu()
+        public virtual async Task Musteri_Sepeti_Getir_Kontrolu()
         {
-            _sepetRepository.SepeteUrunEkle(_testMusteriId, _testUrun1Id, 3);
-            _sepetRepository.SepeteUrunEkle(_testMusteriId, _testUrun2Id, 5);
+            await _sepetRepository.SepeteUrunEkle(_testMusteriId, _testUrun1Id, 3);
+            await _sepetRepository.SepeteUrunEkle(_testMusteriId, _testUrun2Id, 5);
 
-            var sepet = _sepetRepository.MusteriSepetiGetir(_testMusteriId);
+            var sepet = await _sepetRepository.MusteriSepetiGetir(_testMusteriId);
 
             sepet.ShouldNotBeNull();
             sepet.MusteriId.ShouldBe(_testMusteriId);
             sepet.Items.ShouldNotBeEmpty();
             sepet.Items.Count.ShouldBe(2);
-            
+
             SepettekiUrunAdediniKontrolEt(sepet.Items, _testUrun1Id, 3);
             SepettekiUrunAdediniKontrolEt(sepet.Items, _testUrun2Id, 5);
         }
 
-        protected void SepettekiUrunAdediniKontrolEt(int musteriId, int urunId, int olmasiGerekenAdet)
+        protected async Task SepettekiUrunAdediniKontrolEt(int musteriId, int urunId, int olmasiGerekenAdet)
         {
-            var sepet = _sepetRepository.MusteriSepetiGetir(musteriId);
+            var sepet = await _sepetRepository.MusteriSepetiGetir(musteriId);
             sepet.ShouldNotBeNull();
 
             SepettekiUrunAdediniKontrolEt(sepet.Items, urunId, olmasiGerekenAdet);

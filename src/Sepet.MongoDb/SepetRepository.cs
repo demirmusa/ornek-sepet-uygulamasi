@@ -1,4 +1,5 @@
-﻿using MongoDB.Driver;
+﻿using System.Threading.Tasks;
+using MongoDB.Driver;
 using Sepet.Core;
 using Sepet.Core.Models;
 using Sepet.MongoDb.Models;
@@ -14,29 +15,36 @@ namespace Sepet.MongoDb
             _context = context;
         }
 
-        private MusteriSepetiEntity GetirMusteriSepetiEntity(int musteriId)
+        private Task<MusteriSepetiEntity> GetirMusteriSepetiEntity(int musteriId)
         {
             return _context.MusteriSepeti
                 .Find(x => x.MusteriId == musteriId)
-                .FirstOrDefault();
+                .FirstOrDefaultAsync();
         }
 
-        public MusteriSepeti MusteriSepetiGetir(int musteriId)
+        public async Task<MusteriSepeti> MusteriSepetiGetir(int musteriId)
         {
-            var entity = GetirMusteriSepetiEntity(musteriId);
-            if (entity == null)
+            var entity = await GetirMusteriSepetiEntity(musteriId);
+
+            return MusteriSepetiEntityToMusteriSepetiOrDefault(musteriId, entity);
+        }
+
+        private MusteriSepeti MusteriSepetiEntityToMusteriSepetiOrDefault(int musteriId, MusteriSepetiEntity entity)
+        {
+            var sepet = new MusteriSepeti(musteriId);
+            if (entity != null)
             {
-                return new MusteriSepeti(musteriId);
+                sepet.Items = entity.Items;
             }
 
-            return new MusteriSepeti(musteriId) {Items = entity.Items};
+            return sepet;
         }
 
-        public void SepeteUrunEkle(int musteriId, int urunId, int adet)
+        public async Task SepeteUrunEkle(int musteriId, int urunId, int adet)
         {
-            var entity = GetirMusteriSepetiEntity(musteriId);
+            var entity = await GetirMusteriSepetiEntity(musteriId);
 
-            var sepet = MusteriSepetiGetir(musteriId);
+            var sepet = MusteriSepetiEntityToMusteriSepetiOrDefault(musteriId, entity);
             sepet.UrunEkle(urunId, adet);
 
             if (entity == null)
@@ -46,13 +54,13 @@ namespace Sepet.MongoDb
                     MusteriId = musteriId,
                     Items = sepet.Items
                 };
-                _context.MusteriSepeti.InsertOne(entity);
+                await _context.MusteriSepeti.InsertOneAsync(entity);
             }
             else
             {
                 entity.Items = sepet.Items;
 
-                _context.MusteriSepeti.ReplaceOne(
+                await _context.MusteriSepeti.ReplaceOneAsync(
                     x => x.MusteriId == musteriId,
                     entity
                 );
