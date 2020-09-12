@@ -34,7 +34,7 @@ namespace Sepet.Application
             {
                 UrunId = urunId,
                 UrunUcreti = rnd,
-                UrunAdi = $"Dummy data ürün adı{rnd}",
+                UrunAdi = $"Dummy data ürün adı {rnd}",
                 UrunResimAdresi = $"Dummy data ürün resim adresi {rnd}"
             });
         }
