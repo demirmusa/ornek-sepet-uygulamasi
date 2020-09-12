@@ -15,16 +15,17 @@ namespace Sepet.Application.Tests
     {
         protected override void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton(Substitute.For<IStokKontrolAppService>());
             services.AddSepetInMemory();
             services.AddSepetApplication();
+            services.AddSingleton<IStokKontrolApplicationService>(Substitute.For<IStokKontrolApplicationService>());
+            services.AddMemoryCache();
         }
     }
 
     public class SepetApplicationServiceTests : TestBaseClass<SepetApplicationServiceTestFixture>
     {
         private ISepetApplicationService _sepetApplicationService;
-        private IStokKontrolAppService _stokKontrolAppServiceMock;
+        private IStokKontrolApplicationService _stokKontrolApplicationServiceMock;
 
         int _testMusteriId = 1;
         int _testUrun1Id = 1;
@@ -33,13 +34,13 @@ namespace Sepet.Application.Tests
         public SepetApplicationServiceTests(SepetApplicationServiceTestFixture fixture) : base(fixture)
         {
             _sepetApplicationService = GetService<ISepetApplicationService>();
-            _stokKontrolAppServiceMock = GetService<IStokKontrolAppService>();
+            _stokKontrolApplicationServiceMock = GetService<IStokKontrolApplicationService>();
         }
 
         [Fact]
         public virtual async Task Sepete_Yeni_Urun_Ekleme_Kontrolu()
         {
-            _stokKontrolAppServiceMock.StoktaUrunVarmi(Arg.Any<int>()).Returns(true);
+            _stokKontrolApplicationServiceMock.StoktaUrunVarmi(Arg.Any<int>()).Returns(true);
 
             await _sepetApplicationService.SepeteUrunEkle(_testMusteriId, _testUrun1Id, 1);
             await SepettekiUrunAdediniKontrolEt(_testMusteriId, _testUrun1Id, 1);
@@ -53,7 +54,7 @@ namespace Sepet.Application.Tests
         [Fact]
         public virtual async Task Sepete_Yeni_Urun_Ekleme_Stok_Kontrolu()
         {
-            _stokKontrolAppServiceMock.StoktaUrunVarmi(Arg.Any<int>()).Returns(false);
+            _stokKontrolApplicationServiceMock.StoktaUrunVarmi(Arg.Any<int>()).Returns(false);
 
             var exception = await Should.ThrowAsync<StocktaUrunYokException>(() =>
                 _sepetApplicationService.SepeteUrunEkle(_testMusteriId, _testUrun1Id, 1)
@@ -62,7 +63,7 @@ namespace Sepet.Application.Tests
             exception.UrunId.ShouldBe(_testUrun1Id);
             await SepettekiUrunAdediniKontrolEt(_testMusteriId, _testUrun1Id, 0);
 
-            _stokKontrolAppServiceMock.StoktaUrunVarmi(Arg.Any<int>()).Returns(true);
+            _stokKontrolApplicationServiceMock.StoktaUrunVarmi(Arg.Any<int>()).Returns(true);
 
             await _sepetApplicationService.SepeteUrunEkle(_testMusteriId, _testUrun1Id, 1);
             await SepettekiUrunAdediniKontrolEt(_testMusteriId, _testUrun1Id, 1);
@@ -71,12 +72,12 @@ namespace Sepet.Application.Tests
         [Fact]
         public virtual async Task Sepete_Aynı_Urunden_Ekleme_Kontrolu()
         {
-            _stokKontrolAppServiceMock.StoktaUrunVarmi(Arg.Any<int>()).Returns(true);
+            _stokKontrolApplicationServiceMock.StoktaUrunVarmi(Arg.Any<int>()).Returns(true);
 
             await _sepetApplicationService.SepeteUrunEkle(_testMusteriId, _testUrun1Id, 1);
             await SepettekiUrunAdediniKontrolEt(_testMusteriId, _testUrun1Id, 1);
 
-            _stokKontrolAppServiceMock.StoktaUrunVarmi(Arg.Any<int>()).Returns(false);
+            _stokKontrolApplicationServiceMock.StoktaUrunVarmi(Arg.Any<int>()).Returns(false);
 
             var exception = await Should.ThrowAsync<StocktaUrunYokException>(() =>
                 _sepetApplicationService.SepeteUrunEkle(_testMusteriId, _testUrun1Id, 2)
@@ -84,7 +85,7 @@ namespace Sepet.Application.Tests
 
             exception.UrunId.ShouldBe(_testUrun1Id);
 
-            _stokKontrolAppServiceMock.StoktaUrunVarmi(Arg.Any<int>()).Returns(true);
+            _stokKontrolApplicationServiceMock.StoktaUrunVarmi(Arg.Any<int>()).Returns(true);
 
             await _sepetApplicationService.SepeteUrunEkle(_testMusteriId, _testUrun1Id, 2);
             await SepettekiUrunAdediniKontrolEt(_testMusteriId, _testUrun1Id, 3);
@@ -101,7 +102,7 @@ namespace Sepet.Application.Tests
         [Fact]
         public virtual async Task Musteri_Sepeti_Getir_Kontrolu()
         {
-            _stokKontrolAppServiceMock.StoktaUrunVarmi(Arg.Any<int>()).Returns(true);
+            _stokKontrolApplicationServiceMock.StoktaUrunVarmi(Arg.Any<int>()).Returns(true);
 
             await _sepetApplicationService.SepeteUrunEkle(_testMusteriId, _testUrun1Id, 3);
             await _sepetApplicationService.SepeteUrunEkle(_testMusteriId, _testUrun2Id, 5);
@@ -128,11 +129,24 @@ namespace Sepet.Application.Tests
         protected void SepettekiUrunAdediniKontrolEt(List<SepetItemDto> sepetItems, int urunId, int olmasiGerekenAdet)
         {
             sepetItems.ShouldNotBeNull();
-            sepetItems.ShouldNotBeEmpty();
+            if (olmasiGerekenAdet == 0)
+            {
+                var urun = sepetItems.SingleOrDefault(x => x.UrunBilgileri.UrunId == urunId);
+                if (urun == null)
+                {
+                    return;
+                }
 
-            var urun = sepetItems.SingleOrDefault(x => x.UrunBilgileri.UrunId == urunId);
-            urun.ShouldNotBeNull();
-            urun.Adet.ShouldBe(olmasiGerekenAdet);
+                urun.Adet.ShouldBeLessThan(1);
+            }
+            else
+            {
+                sepetItems.ShouldNotBeEmpty();
+
+                var urun = sepetItems.SingleOrDefault(x => x.UrunBilgileri.UrunId == urunId);
+                urun.ShouldNotBeNull();
+                urun.Adet.ShouldBe(olmasiGerekenAdet);
+            }
         }
     }
 }

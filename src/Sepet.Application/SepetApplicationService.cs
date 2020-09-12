@@ -7,16 +7,16 @@ namespace Sepet.Application
 {
     public class SepetApplicationService : ISepetApplicationService
     {
-        private readonly IStokKontrolAppService _stokKontrolAppService;
+        private readonly IStokKontrolApplicationService _stokKontrolApplicationService;
         private readonly ISepetRepository _sepetRepository;
         private readonly IUrunApplicationService _urunApplicationService;
 
         public SepetApplicationService(
-            IStokKontrolAppService stokKontrolAppService,
+            IStokKontrolApplicationService stokKontrolApplicationService,
             ISepetRepository sepetRepository,
             IUrunApplicationService urunApplicationService)
         {
-            _stokKontrolAppService = stokKontrolAppService;
+            _stokKontrolApplicationService = stokKontrolApplicationService;
             _sepetRepository = sepetRepository;
             _urunApplicationService = urunApplicationService;
         }
@@ -28,9 +28,19 @@ namespace Sepet.Application
             return dto;
         }
 
-        public Task SepeteUrunEkle(int musteriId, int urunId, int adet)
+        public async Task SepeteUrunEkle(int musteriId, int urunId, int adet)
         {
-            throw new System.NotImplementedException();
+            if (!_stokKontrolApplicationService.StoktaUrunVarmi(urunId))
+            {
+                throw new StocktaUrunYokException(urunId);
+            }
+
+            if (adet < 1)
+            {
+                throw new UserFriendlyException("Adet 1 den küçük olamaz");
+            }
+
+            await _sepetRepository.SepeteUrunEkle(musteriId, urunId, adet);
         }
 
         private async Task<MusteriSepetiDto> SepetDtoOlustur(MusteriSepeti sepet)

@@ -1,6 +1,6 @@
 ﻿namespace Sepet.Application
 {
-    public class StokKontrolAppService : IStokKontrolAppService
+    public class StokKontrolApplicationService : IStokKontrolApplicationService
     {
         public bool StoktaUrunVarmi(int urunId)
         {

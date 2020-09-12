@@ -19,7 +19,11 @@ namespace Sepet.Application
 
         public Task<UrunBilgileriDto> GetirUrunBilgileri(int urunId)
         {
-            return _cache.GetOrCreateAsync<UrunBilgileriDto>(GetCacheKey(urunId), x => EndpointtenUrunBilgileriniGetir(urunId));
+            return _cache.GetOrCreateAsync(GetCacheKey(urunId), x =>
+            {
+                x.SetAbsoluteExpiration(TimeSpan.FromMinutes(3));
+                return EndpointtenUrunBilgileriniGetir(urunId);
+            });
         }
 
         //bu fonksiyonlar normalde asenkron olacakları için task türünde yazıldı
@@ -29,8 +33,8 @@ namespace Sepet.Application
             return Task.FromResult(new UrunBilgileriDto()
             {
                 UrunId = urunId,
-                UrunAdi = $"Dummy data ürün adı{rnd}",
                 UrunUcreti = rnd,
+                UrunAdi = $"Dummy data ürün adı{rnd}",
                 UrunResimAdresi = $"Dummy data ürün resim adresi {rnd}"
             });
         }
