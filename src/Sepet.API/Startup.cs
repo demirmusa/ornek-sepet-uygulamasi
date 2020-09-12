@@ -34,9 +34,9 @@ namespace Sepet.API
             {
                 services.AddSepetInMemory();
             }
-            
+
             services.AddSepetApplication();
-            
+            services.AddMemoryCache();
             services.AddControllers();
         }
 
