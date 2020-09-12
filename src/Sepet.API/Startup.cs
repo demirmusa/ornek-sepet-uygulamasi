@@ -18,13 +18,17 @@ namespace Sepet.API
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             //test ederken kolaylık olması için bu şekilde eklendi. Appsettingsde StorageType alanını değiştirebilirsiniz.
             if (SepetMongoDbAktifMi)
             {
-                services.AddSepetMongoDb();
+                services.AddSepetMongoDb(x =>
+                    {
+                        x.ConnectionString = Configuration["SepetMongoDb:ConnectionString"];
+                        x.Database = Configuration["SepetMongoDb:Database"];
+                    }
+                );
             }
             else if (SepetInMemoryAktifMi)
             {
