@@ -8,7 +8,6 @@
       <ProjectReference Include="..\Sepet.Application\Sepet.Application.csproj" />
       <ProjectReference Include="..\Sepet.InMemory\Sepet.InMemory.csproj" />
       <ProjectReference Include="..\Sepet.MongoDb\Sepet.MongoDb.csproj" />
-      <ProjectReference Include="..\Sepet.Redis\Sepet.Redis.csproj" />
     </ItemGroup>
 
     <ItemGroup>
